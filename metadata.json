@@ -1,0 +1,8 @@
+{
+  "name": "The Fit Student Blueprint",
+  "description": "Your 30-Day Guide to Getting Fit, Building Healthy Habits & Feeling Better at University. Interactive digital workbook and 30-day wellness system.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
