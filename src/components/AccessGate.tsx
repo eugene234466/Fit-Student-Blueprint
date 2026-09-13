@@ -39,6 +39,8 @@ export const AccessGate: React.FC<AccessGateProps> = ({
     e.preventDefault();
     const clean = accessCode.trim().toUpperCase();
     if (
+      clean === 'STUDENT29' ||
+      clean === 'STUDENT' ||
       clean === 'STUDENT79' ||
       clean === 'FITSTUDENT' ||
       clean === 'UNLOCKED' ||

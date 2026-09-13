@@ -5,6 +5,7 @@ import { initialWorkbookState, sampleFilledState } from '../data/defaultState';
 const STORAGE_KEY = 'the_fit_student_blueprint_state_v1';
 const PAGE_STORAGE_KEY = 'the_fit_student_blueprint_page_v1';
 export const UNLOCKED_STORAGE_KEY = 'the_fit_student_blueprint_unlocked_v1';
+export const PARTNER_REVIEW_KEY = 'the_fit_student_blueprint_partner_review_v1';
 export const FREE_SAMPLE_MAX_PAGE = 8;
 
 interface WorkbookContextType {
@@ -12,9 +13,12 @@ interface WorkbookContextType {
   currentPage: number;
   totalPages: number;
   isUnlocked: boolean;
+  isPartnerReview: boolean;
   FREE_SAMPLE_MAX_PAGE: number;
   unlockFullAccess: (buyerInfo?: { email?: string; reference?: string; tier?: string }) => void;
   lockAccess: () => void;
+  activatePartnerReviewPass: () => void;
+  deactivatePartnerReviewPass: () => void;
   setCurrentPage: (page: number) => void;
   nextPage: () => void;
   prevPage: () => void;
@@ -81,9 +85,23 @@ export const WorkbookProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return 1;
   });
 
+  const [isPartnerReview, setIsPartnerReview] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem(PARTNER_REVIEW_KEY);
+        return saved === 'true';
+      } catch {
+        return false;
+      }
+    }
+    return false;
+  });
+
   const [isUnlocked, setIsUnlocked] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
       try {
+        const partner = localStorage.getItem(PARTNER_REVIEW_KEY);
+        if (partner === 'true') return true;
         const saved = localStorage.getItem(UNLOCKED_STORAGE_KEY);
         if (saved === 'true') return true;
         if (saved) {
@@ -126,10 +144,42 @@ export const WorkbookProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
-  const lockAccess = () => {
+  const activatePartnerReviewPass = () => {
+    setIsPartnerReview(true);
+    setIsUnlocked(true);
+    try {
+      localStorage.setItem(PARTNER_REVIEW_KEY, 'true');
+      localStorage.setItem(
+        UNLOCKED_STORAGE_KEY,
+        JSON.stringify({
+          unlocked: true,
+          isPartnerReview: true,
+          timestamp: Date.now(),
+          tier: 'partner_review',
+        })
+      );
+    } catch {
+      // ignore
+    }
+  };
+
+  const deactivatePartnerReviewPass = () => {
+    setIsPartnerReview(false);
     setIsUnlocked(false);
     try {
+      localStorage.removeItem(PARTNER_REVIEW_KEY);
       localStorage.removeItem(UNLOCKED_STORAGE_KEY);
+    } catch {
+      // ignore
+    }
+  };
+
+  const lockAccess = () => {
+    setIsUnlocked(false);
+    setIsPartnerReview(false);
+    try {
+      localStorage.removeItem(UNLOCKED_STORAGE_KEY);
+      localStorage.removeItem(PARTNER_REVIEW_KEY);
     } catch {
       // ignore
     }
@@ -566,9 +616,12 @@ export const WorkbookProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         importDataJSON,
         completionPercentage,
         isUnlocked,
+        isPartnerReview,
         FREE_SAMPLE_MAX_PAGE,
         unlockFullAccess,
         lockAccess,
+        activatePartnerReviewPass,
+        deactivatePartnerReviewPass,
       }}
     >
       {children}

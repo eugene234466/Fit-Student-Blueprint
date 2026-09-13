@@ -5,6 +5,7 @@ import { PageRenderer } from './components/PageRenderer';
 import { PdfExportModal } from './components/PdfExportModal';
 import { SalesPage } from './components/sales/SalesPage';
 import { CheckoutModal } from './components/sales/CheckoutModal';
+import { LegalModal, LegalTab } from './components/legal/LegalModal';
 
 import {
   BookOpen,
@@ -24,15 +25,36 @@ import {
   FileText,
   ShoppingBag,
   Lock,
+  ShieldCheck,
+  Briefcase,
+  Building2,
 } from 'lucide-react';
 
 function WorkbookApp() {
-  const { state, currentPage, totalPages, setCurrentPage, nextPage, prevPage, isUnlocked } = useWorkbook();
+  const {
+    state,
+    currentPage,
+    totalPages,
+    setCurrentPage,
+    nextPage,
+    prevPage,
+    isUnlocked,
+    isPartnerReview,
+    activatePartnerReviewPass,
+    deactivatePartnerReviewPass,
+  } = useWorkbook();
   const [isTocOpen, setIsTocOpen] = useState(false);
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [checkoutTier, setCheckoutTier] = useState<'starter' | 'complete' | 'mastery'>('complete');
   const [pageInput, setPageInput] = useState<string>(String(currentPage));
+  const [isLegalModalOpen, setIsLegalModalOpen] = useState(false);
+  const [legalTab, setLegalTab] = useState<LegalTab>('health');
+
+  const openLegal = (tab: LegalTab) => {
+    setLegalTab(tab);
+    setIsLegalModalOpen(true);
+  };
 
   // Mode: 'sales' | 'workbook'
   const [viewMode, setViewMode] = useState<'sales' | 'workbook'>(() => {
@@ -277,7 +299,17 @@ function WorkbookApp() {
             </button>
 
             {/* Quick Unlock or Unlocked Status Badge */}
-            {!isUnlocked ? (
+            {isPartnerReview ? (
+              <button
+                onClick={() => setIsPdfModalOpen(true)}
+                className="flex items-center gap-1.5 bg-blue-600/90 hover:bg-blue-600 text-white text-xs font-bold px-2.5 sm:px-3 py-1.5 rounded-lg transition-all shadow-sm shrink-0 border border-blue-400/30"
+                title="Business Partner Review Pass Active - Click to export pitch deck or complete workbook"
+              >
+                <Briefcase className="w-3.5 h-3.5 text-blue-200" />
+                <span className="hidden sm:inline">Partner Review Pass</span>
+                <span className="sm:hidden">Partner</span>
+              </button>
+            ) : !isUnlocked ? (
               <button
                 onClick={() => {
                   setCheckoutTier('complete');
@@ -460,9 +492,69 @@ function WorkbookApp() {
               })}
             </div>
 
+            {/* Business Partner Evaluation Pass */}
+            <div className="p-3 bg-blue-950/70 border-t border-blue-400/20 text-xs text-blue-100">
+              <div className="flex items-center justify-between">
+                <span className="font-bold flex items-center gap-1.5 text-blue-200">
+                  <Briefcase className="w-3.5 h-3.5 text-blue-400" />
+                  <span>Partner & Sponsor Pitch</span>
+                </span>
+                {isPartnerReview ? (
+                  <button
+                    onClick={deactivatePartnerReviewPass}
+                    className="text-[10px] text-blue-300 hover:text-white underline font-semibold"
+                  >
+                    Pass Active (Exit)
+                  </button>
+                ) : (
+                  <button
+                    onClick={activatePartnerReviewPass}
+                    className="text-[10px] bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-400/30 px-2 py-0.5 rounded font-bold transition-colors"
+                  >
+                    Enable Pass
+                  </button>
+                )}
+              </div>
+              <p className="text-[11px] text-blue-200/70 mt-1 leading-relaxed">
+                Presenting to campus gym directors, student unions, or brand sponsors?
+              </p>
+              <button
+                onClick={() => {
+                  setIsTocOpen(false);
+                  setIsPdfModalOpen(true);
+                }}
+                className="mt-2 w-full py-1.5 px-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-bold text-[11px] transition-colors flex items-center justify-center gap-1.5 shadow-xs"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Download Pitch Deck / Complete PDF</span>
+              </button>
+            </div>
+
             {/* Drawer Footer */}
-            <div className="p-3 bg-black/40 border-t border-white/10 text-center text-[11px] text-gray-400">
-              Tip: Use Left & Right Arrow keys to flip pages
+            <div className="p-3 bg-black/40 border-t border-white/10 flex items-center justify-between text-[11px] text-gray-400">
+              <div className="flex items-center gap-2 text-[10px]">
+                <button
+                  onClick={() => openLegal('health')}
+                  className="hover:text-white transition-colors underline"
+                >
+                  Health Disclaimer
+                </button>
+                <span>•</span>
+                <button
+                  onClick={() => openLegal('privacy')}
+                  className="hover:text-white transition-colors underline"
+                >
+                  Privacy
+                </button>
+                <span>•</span>
+                <button
+                  onClick={() => openLegal('terms')}
+                  className="hover:text-white transition-colors underline"
+                >
+                  Terms
+                </button>
+              </div>
+              <span className="text-[10px] text-gray-500">Left & Right keys flip</span>
             </div>
           </div>
         </div>
@@ -494,6 +586,15 @@ function WorkbookApp() {
             >
               <Download className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Export PDF</span>
+            </button>
+
+            <button
+              onClick={() => openLegal('health')}
+              className="hidden sm:flex items-center gap-1 px-2 py-1 rounded bg-white/10 hover:bg-white/20 text-gray-300 hover:text-white transition-colors"
+              title="Health Disclaimer & Legal Policies"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-[#38B66B]" />
+              <span className="text-[11px]">Legal</span>
             </button>
 
             <span className="text-gray-400 hidden sm:inline">•</span>
@@ -546,6 +647,13 @@ function WorkbookApp() {
           setIsCheckoutOpen(false);
           handleJump(targetPage);
         }}
+      />
+
+      {/* Legal & Compliance Policies Modal */}
+      <LegalModal
+        isOpen={isLegalModalOpen}
+        onClose={() => setIsLegalModalOpen(false)}
+        initialTab={legalTab}
       />
     </div>
   );

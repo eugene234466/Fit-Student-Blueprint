@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useWorkbook } from '../../context/WorkbookContext';
+import { LegalModal, LegalTab } from '../legal/LegalModal';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -43,6 +44,13 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [availableCurrencies, setAvailableCurrencies] = useState<string[]>(['GHS', 'USD']);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [pendingCheckoutUrl, setPendingCheckoutUrl] = useState<string | null>(null);
+  const [isLegalModalOpen, setIsLegalModalOpen] = useState(false);
+  const [legalTab, setLegalTab] = useState<LegalTab>('terms');
+
+  const openLegal = (tab: LegalTab) => {
+    setLegalTab(tab);
+    setIsLegalModalOpen(true);
+  };
 
   // Sync initial tier if prop changes
   useEffect(() => {
@@ -121,10 +129,10 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
   const tierDetails = {
     starter: {
-      name: 'Starter Blueprint',
-      amounts: { GHS: 49, USD: 4, NGN: 5500, ZAR: 69 },
+      name: 'Starter Blueprint (Student Discount)',
+      amounts: { GHS: 29, USD: 2.5, NGN: 3500, ZAR: 45 },
       originalAmounts: { GHS: 120, USD: 9, NGN: 14000, ZAR: 170 },
-      tag: 'Core Essentials',
+      tag: 'Student Discount • Core Essentials',
       items: [
         'The Fit Student Blueprint 68-Page Master PDF',
         '30-Day Daily Habit & Progress Tracker',
@@ -391,7 +399,9 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                           : 'text-gray-300 hover:text-white hover:bg-white/5 font-medium'
                       }`}
                     >
-                      <div className="text-xs leading-tight capitalize">{t}</div>
+                      <div className="text-xs leading-tight capitalize">
+                        {t === 'starter' ? 'Student Plan' : t === 'complete' ? 'Complete' : 'Mastery'}
+                      </div>
                       <div className="text-[11px] opacity-90">{tPrice}</div>
                     </button>
                   );
@@ -500,6 +510,37 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   </div>
                 </div>
 
+                {/* Student Rate Notification & Quick-Switch */}
+                {tier !== 'starter' ? (
+                  <div className="p-2.5 rounded-lg bg-[#38B66B]/10 border border-[#38B66B]/30 flex items-center justify-between gap-2 text-xs">
+                    <div className="flex items-center gap-1.5 text-gray-200 text-[11px]">
+                      <Sparkles className="w-3.5 h-3.5 text-[#38B66B] shrink-0" />
+                      <span>Are you a university student?</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setTier('starter')}
+                      className="px-2.5 py-1 rounded-md bg-[#38B66B] hover:bg-[#2fa35e] text-white font-bold text-[11px] tracking-wide shrink-0 transition-colors"
+                    >
+                      Apply Student Rate ({currency === 'GHS' ? 'GH₵ 29' : '$2.50'})
+                    </button>
+                  </div>
+                ) : (
+                  <div className="p-2.5 rounded-lg bg-[#38B66B]/15 border border-[#38B66B]/30 flex items-center justify-between gap-2 text-xs">
+                    <div className="flex items-center gap-1.5 text-[#38B66B] font-semibold text-[11px]">
+                      <CheckCircle2 className="w-4 h-4 shrink-0" />
+                      <span>Student Discount Active — {currency === 'GHS' ? 'GH₵ 29' : '$2.50'} Rate Applied!</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setTier('complete')}
+                      className="text-[10px] text-gray-400 hover:text-white underline shrink-0"
+                    >
+                      View 30-Day System (GH₵ 79)
+                    </button>
+                  </div>
+                )}
+
                 {/* Payment Gateway Status & Bank Connection Info */}
                 <div className="p-2.5 rounded-lg bg-black/30 border border-white/10 text-[11px] flex items-start gap-2">
                   <Building2 className="w-4 h-4 text-[#F4C95D] shrink-0 mt-0.5" />
@@ -573,6 +614,45 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     <span>Or run instant demo test (skip payment)</span>
                   </button>
                 )}
+
+                {/* Legal Consent Notice */}
+                <div className="pt-2 px-1 text-center">
+                  <p className="text-[10px] text-gray-400 leading-tight">
+                    By completing this order, you agree to our{' '}
+                    <button
+                      type="button"
+                      onClick={() => openLegal('terms')}
+                      className="text-[#F4C95D] underline hover:text-white font-medium inline"
+                    >
+                      Terms of Sale
+                    </button>
+                    ,{' '}
+                    <button
+                      type="button"
+                      onClick={() => openLegal('privacy')}
+                      className="text-[#38B66B] underline hover:text-white font-medium inline"
+                    >
+                      Privacy Policy
+                    </button>
+                    , and{' '}
+                    <button
+                      type="button"
+                      onClick={() => openLegal('health')}
+                      className="text-rose-400 underline hover:text-white font-medium inline"
+                    >
+                      Health Disclaimer
+                    </button>
+                    . Backed by our{' '}
+                    <button
+                      type="button"
+                      onClick={() => openLegal('refund')}
+                      className="text-emerald-400 underline hover:text-white font-medium inline"
+                    >
+                      30-Day Money-Back Guarantee
+                    </button>
+                    .
+                  </p>
+                </div>
               </form>
 
               {/* Guarantees & Security footer */}
@@ -590,6 +670,13 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
           )}
         </div>
       </div>
+
+      {/* Legal Policies Modal inside Checkout */}
+      <LegalModal
+        isOpen={isLegalModalOpen}
+        onClose={() => setIsLegalModalOpen(false)}
+        initialTab={legalTab}
+      />
     </div>
   );
 };

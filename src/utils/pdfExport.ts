@@ -125,11 +125,33 @@ export async function capturePageCanvas(
         body.style.setProperty('-moz-osx-font-smoothing', 'grayscale');
       }
 
-      // 2. Hide all elements marked with .no-print to respect print styles
+      // 2. Hide all elements marked with .no-print to respect print styles (except export stage)
       const noPrintElements = clonedDoc.querySelectorAll('.no-print');
       noPrintElements.forEach((el) => {
-        (el as HTMLElement).style.setProperty('display', 'none', 'important');
+        const htmlEl = el as HTMLElement;
+        if (
+          htmlEl.id === 'pdf-export-hidden-stage' ||
+          htmlEl.closest('#pdf-export-hidden-stage') ||
+          htmlEl.getAttribute('data-pdf-stage') === 'true'
+        ) {
+          return;
+        }
+        htmlEl.style.setProperty('display', 'none', 'important');
       });
+
+      // Explicitly ensure the staging container is fully visible and correctly sized in cloned DOM
+      const stageInClone = clonedDoc.getElementById('pdf-export-hidden-stage');
+      if (stageInClone) {
+        stageInClone.style.setProperty('display', 'block', 'important');
+        stageInClone.style.setProperty('visibility', 'visible', 'important');
+        stageInClone.style.setProperty('opacity', '1', 'important');
+        stageInClone.style.setProperty('position', 'relative', 'important');
+        stageInClone.style.setProperty('left', '0px', 'important');
+        stageInClone.style.setProperty('top', '0px', 'important');
+        stageInClone.style.setProperty('width', '850px', 'important');
+        stageInClone.style.setProperty('min-height', '1202px', 'important');
+        stageInClone.style.setProperty('z-index', '9999', 'important');
+      }
 
       // 3. Clean up shadow, borders, and margins for print perfection
       const pageElements = clonedDoc.querySelectorAll('.workbook-page');
@@ -228,12 +250,21 @@ export async function exportElementToPdf(
     compress: true,
   });
 
+  const cWidth = Number.isFinite(canvas.width) && canvas.width > 0 ? canvas.width : 850;
+  const cHeight = Number.isFinite(canvas.height) && canvas.height > 0 ? canvas.height : 1202;
   const imgWidth = 210; // A4 width
-  const imgHeight = (canvas.height * imgWidth) / canvas.width;
+  const rawImgHeight = (cHeight * imgWidth) / cWidth;
+  const imgHeight = Number.isFinite(rawImgHeight) && rawImgHeight > 0 ? rawImgHeight : 297;
 
   // If the aspect ratio closely matches A4 (297mm), fit exactly to full page
   const fitHeight = Math.abs(imgHeight - 297) < 5 ? 297 : imgHeight;
-  const offsetY = fitHeight === 297 ? 0 : Math.max(0, (297 - fitHeight) / 2);
+  const rawOffset = (297 - fitHeight) / 2;
+  const offsetY = fitHeight >= 297 || !Number.isFinite(rawOffset) ? 0 : Math.max(0, rawOffset);
+
+  const safeX = 0;
+  const safeY = Number.isFinite(offsetY) ? Number(offsetY.toFixed(2)) : 0;
+  const safeW = Number.isFinite(imgWidth) && imgWidth > 0 ? Number(imgWidth.toFixed(2)) : 210;
+  const safeH = Number.isFinite(fitHeight) && fitHeight > 0 ? Number(fitHeight.toFixed(2)) : 297;
 
   // Ultra quality uses ultra-clean JPEG at 0.985 or PNG for pristine text
   const usePng = options.usePng ?? (options.quality === 'ultra');
@@ -242,6 +273,6 @@ export async function exportElementToPdf(
     ? canvas.toDataURL('image/png')
     : canvas.toDataURL('image/jpeg', 0.985);
 
-  pdf.addImage(imgData, format, 0, offsetY, imgWidth, fitHeight, undefined, 'FAST');
+  pdf.addImage(imgData, format, safeX, safeY, safeW, safeH, undefined, 'FAST');
   savePdfDocument(pdf, filename);
 }

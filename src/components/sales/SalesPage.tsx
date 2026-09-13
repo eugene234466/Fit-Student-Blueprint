@@ -27,6 +27,7 @@ import {
   ShoppingBag,
 } from 'lucide-react';
 import { CheckoutModal } from './CheckoutModal';
+import { LegalModal, LegalTab } from '../legal/LegalModal';
 
 interface SalesPageProps {
   onOpenWorkbook: (targetPage?: number) => void;
@@ -34,6 +35,13 @@ interface SalesPageProps {
 
 export const SalesPage: React.FC<SalesPageProps> = ({ onOpenWorkbook }) => {
   const [selectedTier, setSelectedTier] = useState<'starter' | 'complete' | 'mastery'>('complete');
+  const [isLegalModalOpen, setIsLegalModalOpen] = useState(false);
+  const [legalModalTab, setLegalModalTab] = useState<LegalTab>('privacy');
+
+  const openLegal = (tab: LegalTab) => {
+    setLegalModalTab(tab);
+    setIsLegalModalOpen(true);
+  };
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(() => {
     if (typeof window !== 'undefined') {
       const hash = window.location.hash;
@@ -824,17 +832,17 @@ export const SalesPage: React.FC<SalesPageProps> = ({ onOpenWorkbook }) => {
           <div className="p-6 rounded-2xl bg-[#14213D] text-white flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
             <div>
               <div className="text-xs uppercase tracking-wider text-[#F4C95D] font-bold">
-                Total Combined Real Value: $172
+                Student Discount • Limited Campus Enrollment
               </div>
               <div className="text-xl sm:text-2xl font-black font-heading mt-0.5">
-                Today's Student Enrollment Price: Just $27
+                Today's Student Discount Price: Just GH₵ 29
               </div>
             </div>
             <button
-              onClick={() => handleBuyNow('complete')}
+              onClick={() => handleBuyNow('starter')}
               className="px-6 py-3 rounded-xl bg-[#38B66B] hover:bg-[#2fa35e] text-white text-xs font-bold uppercase tracking-wider transition-all shadow-md shrink-0"
             >
-              Claim Student Discount &rarr;
+              Claim Student Discount (GH₵ 29) &rarr;
             </button>
           </div>
         </div>
@@ -934,21 +942,21 @@ export const SalesPage: React.FC<SalesPageProps> = ({ onOpenWorkbook }) => {
             <div className="bg-white/5 border border-white/15 rounded-3xl p-6 sm:p-8 flex flex-col justify-between space-y-6">
               <div className="space-y-4">
                 <div>
-                  <span className="text-xs text-gray-400 font-bold uppercase tracking-wider">
-                    Core PDF
+                  <span className="text-[10px] text-[#38B66B] font-bold uppercase tracking-wider bg-[#38B66B]/20 px-2.5 py-0.5 rounded">
+                    Student Discount
                   </span>
-                  <h3 className="text-xl font-black text-white font-heading mt-1">
+                  <h3 className="text-xl font-black text-white font-heading mt-1.5">
                     Starter Blueprint
                   </h3>
                   <p className="text-xs text-gray-400 mt-1">
-                    Ideal for students wanting just the printable master book.
+                    Special student discount edition. Complete 68-page printable master book.
                   </p>
                 </div>
 
                 <div className="flex items-baseline gap-2">
-                  <span className="text-3xl sm:text-4xl font-black text-white font-heading">GH₵ 49</span>
+                  <span className="text-3xl sm:text-4xl font-black text-white font-heading">GH₵ 29</span>
                   <span className="text-xs line-through text-gray-500">GH₵ 120</span>
-                  <span className="text-[11px] text-gray-400">one-time</span>
+                  <span className="text-[11px] text-[#38B66B] font-semibold">Save GH₵ 91</span>
                 </div>
 
                 <ul className="space-y-2.5 text-xs text-gray-300 pt-3 border-t border-white/10">
@@ -979,7 +987,7 @@ export const SalesPage: React.FC<SalesPageProps> = ({ onOpenWorkbook }) => {
                 onClick={() => handleBuyNow('starter')}
                 className="w-full py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs uppercase tracking-wider transition-colors"
               >
-                Choose Starter — GH₵ 49
+                Choose Student Discount — GH₵ 29
               </button>
             </div>
 
@@ -1122,6 +1130,16 @@ export const SalesPage: React.FC<SalesPageProps> = ({ onOpenWorkbook }) => {
             <p className="text-xs text-gray-600 leading-relaxed">
               Take the full 30 days to test the blueprint. If you don't feel noticeably stronger, more energized in your morning lectures, and in control of your daily routine, simply send us an email. We'll refund every single penny immediately. You have nothing to lose and a vibrant, healthy semester to gain.
             </p>
+            <div className="pt-1">
+              <button
+                type="button"
+                onClick={() => openLegal('refund')}
+                className="text-xs font-bold text-[#38B66B] hover:text-[#2fa35e] underline inline-flex items-center gap-1"
+              >
+                <span>Read our official 30-day refund policy & terms</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
         </div>
       </section>
@@ -1218,31 +1236,158 @@ export const SalesPage: React.FC<SalesPageProps> = ({ onOpenWorkbook }) => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-[#0e172a] text-gray-400 py-10 px-4 text-xs border-t border-white/10">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="space-y-1 text-center sm:text-left">
-            <div className="text-white font-bold text-sm tracking-wide uppercase font-heading">
-              The Fit Student Blueprint
+      {/* Comprehensive Legal & Corporate Footer */}
+      <footer className="bg-[#0b1324] text-gray-400 py-12 px-4 text-xs border-t border-white/10">
+        <div className="max-w-6xl mx-auto space-y-8">
+          {/* Main Footer Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            {/* Col 1: Identity & Publishing Info */}
+            <div className="space-y-2 md:col-span-1">
+              <div className="text-white font-black text-sm tracking-wide uppercase font-heading">
+                The Fit Student Blueprint
+              </div>
+              <p className="text-[11px] text-gray-400 leading-relaxed">
+                Published by Modern Student Wellness Publishing. Dedicated to helping college students build sustainable strength, high morning energy, and resilient habits on a real campus budget.
+              </p>
+              <div className="pt-2 text-[11px] text-gray-500">
+                <span>© {new Date().getFullYear()} Modern Student Wellness Publishing. All rights reserved.</span>
+              </div>
             </div>
-            <p className="text-[11px] text-gray-500">
-              Modern Student Wellness Publishing. All rights reserved.
-            </p>
+
+            {/* Col 2: Legal Policies & Compliance */}
+            <div className="space-y-2">
+              <div className="text-xs font-bold text-white uppercase tracking-wider">
+                Legal & Compliance
+              </div>
+              <ul className="space-y-2 text-[11px]">
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => openLegal('privacy')}
+                    className="hover:text-white transition-colors text-left"
+                  >
+                    Privacy Policy & Data Rights
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => openLegal('health')}
+                    className="hover:text-white transition-colors text-left"
+                  >
+                    Health & Medical Disclaimer
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => openLegal('terms')}
+                    className="hover:text-white transition-colors text-left"
+                  >
+                    Terms of Service & License
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => openLegal('refund')}
+                    className="hover:text-white transition-colors text-left"
+                  >
+                    30-Day Money-Back Guarantee
+                  </button>
+                </li>
+              </ul>
+            </div>
+
+            {/* Col 3: Workbook Navigation */}
+            <div className="space-y-2">
+              <div className="text-xs font-bold text-white uppercase tracking-wider">
+                Student Resources
+              </div>
+              <ul className="space-y-2 text-[11px]">
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => onOpenWorkbook(1)}
+                    className="hover:text-white transition-colors text-left"
+                  >
+                    Interactive Workbook Preview
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => onOpenWorkbook(2)}
+                    className="hover:text-white transition-colors text-left"
+                  >
+                    Notice & Publication Page
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => onOpenWorkbook(3)}
+                    className="hover:text-white transition-colors text-left"
+                  >
+                    68-Page Table of Contents
+                  </button>
+                </li>
+                <li>
+                  <a href="#faq" className="hover:text-white transition-colors">
+                    Frequently Asked Questions
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Col 4: Trust, Security & Support */}
+            <div className="space-y-3">
+              <div className="text-xs font-bold text-white uppercase tracking-wider">
+                Security & Support
+              </div>
+              <p className="text-[11px] text-gray-400">
+                Payment transactions secured with 256-bit bank-grade encryption via Paystack.
+              </p>
+              <div className="p-3 bg-white/5 rounded-xl border border-white/10 space-y-1">
+                <div className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">
+                  Customer & Student Support
+                </div>
+                <a
+                  href="mailto:support@thefitstudent.com"
+                  className="text-xs text-[#38B66B] font-bold hover:underline block"
+                >
+                  support@thefitstudent.com
+                </a>
+                <span className="text-[10px] text-gray-500 block">Response time: within 24–48 hours</span>
+              </div>
+
+              <div className="p-3 bg-blue-950/40 rounded-xl border border-blue-500/20 space-y-1">
+                <div className="text-[10px] text-blue-300 font-semibold uppercase tracking-wider flex items-center justify-between">
+                  <span>Campus & Gym Partners</span>
+                  <span className="text-[9px] bg-blue-500/30 text-blue-200 px-1.5 py-0.5 rounded font-mono">B2B</span>
+                </div>
+                <p className="text-[10px] text-gray-300">
+                  Institutional bulk licensing & business partner evaluation pass.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => onOpenWorkbook(1)}
+                  className="text-xs text-blue-400 font-bold hover:underline block text-left pt-0.5"
+                >
+                  Open Executive Partner Deck &rarr;
+                </button>
+              </div>
+            </div>
           </div>
 
-          <div className="flex items-center gap-6 text-xs">
-            <button onClick={() => onOpenWorkbook(1)} className="hover:text-white transition-colors">
-              Interactive Workbook
-            </button>
-            <button onClick={() => onOpenWorkbook(2)} className="hover:text-white transition-colors">
-              Disclaimer & Terms
-            </button>
-            <a href="#faq" className="hover:text-white transition-colors">
-              FAQ
-            </a>
-            <button onClick={() => handleBuyNow('complete')} className="text-[#38B66B] font-bold hover:underline">
-              Get Access (GH₵ 79)
-            </button>
+          {/* Mandatory Medical & Liability Disclaimer Bar */}
+          <div className="pt-6 border-t border-white/10 text-[10px] text-gray-500 leading-relaxed space-y-2">
+            <p>
+              <strong>HEALTH & SAFETY NOTICE:</strong> The Fit Student Blueprint and its associated materials are published solely for general educational, habit-formation, and informational purposes. This content does not constitute medical advice, clinical diagnosis, personalized athletic training, or dietary prescription. You must consult a qualified physician or healthcare provider before undertaking any physical exercise program or modifying your nutritional intake. By using this service, you acknowledge that physical activity involves inherent risks of injury and you voluntarily assume all risks.
+            </p>
+            <p>
+              <strong>INTELLECTUAL PROPERTY & LICENSING:</strong> Each purchase entitles the buyer to a single-user, non-transferable personal license. Unauthorized reproduction, public upload to cloud drives, torrents, or sharing across group chats is strictly prohibited by law.
+            </p>
           </div>
         </div>
       </footer>
@@ -1253,6 +1398,13 @@ export const SalesPage: React.FC<SalesPageProps> = ({ onOpenWorkbook }) => {
         onClose={() => setIsCheckoutOpen(false)}
         selectedTier={selectedTier}
         onAccessWorkbook={(page = 1) => onOpenWorkbook(page)}
+      />
+
+      {/* Legal Policies Modal */}
+      <LegalModal
+        isOpen={isLegalModalOpen}
+        onClose={() => setIsLegalModalOpen(false)}
+        initialTab={legalModalTab}
       />
     </div>
   );

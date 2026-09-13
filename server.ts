@@ -117,15 +117,15 @@ async function startServer() {
         }
       > = {
         starter: {
-          name: 'The Fit Student Blueprint - Starter Edition',
+          name: 'The Fit Student Blueprint - Student Discount Starter Edition',
           amounts: {
-            USD: 4,
-            GHS: 49,
-            NGN: 5500,
-            ZAR: 69,
-            KES: 500,
+            USD: 2.5,
+            GHS: 29,
+            NGN: 3500,
+            ZAR: 45,
+            KES: 350,
           },
-          description: '68-page master PDF + printable 30-day tracking grid & dorm card',
+          description: '68-page master PDF + printable 30-day tracking grid & dorm card (Student Discount)',
         },
         complete: {
           name: 'The 30-Day Complete System',

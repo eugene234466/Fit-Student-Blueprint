@@ -1,7 +1,8 @@
-import React from 'react';
-import { ShieldCheck, BookOpen, Compass, Flame, Apple, Moon, RotateCcw, ArrowRight, CheckSquare, Sparkles } from 'lucide-react';
+import React, { useState } from 'react';
+import { ShieldCheck, BookOpen, Compass, Flame, Apple, Moon, RotateCcw, ArrowRight, CheckSquare, Sparkles, HeartPulse, Scale, AlertTriangle, FileText, Lock } from 'lucide-react';
 import { PageContainer } from '../PageContainer';
 import { PART_INFO } from '../../data/bookData';
+import { LegalModal, LegalTab } from '../legal/LegalModal';
 
 interface FrontMatterProps {
   onJumpToPage: (pageNumber: number) => void;
@@ -100,55 +101,123 @@ export const CoverPage: React.FC<FrontMatterProps> = ({ onJumpToPage }) => {
 };
 
 export const CopyrightDisclaimerPage: React.FC = () => {
+  const [isLegalModalOpen, setIsLegalModalOpen] = useState(false);
+  const [legalTab, setLegalTab] = useState<LegalTab>('health');
+
+  const openLegal = (tab: LegalTab) => {
+    setLegalTab(tab);
+    setIsLegalModalOpen(true);
+  };
+
   return (
     <PageContainer
       pageNumber={2}
       partTitle="Front Matter"
       category="Notice"
       title="Disclaimer & Publication Notice"
-      subtitle="Important health, fitness, and copyright information"
+      subtitle="Important health, fitness, copyright, and legal information"
     >
-      <div className="space-y-6 text-sm text-gray-700 leading-relaxed max-w-2xl mx-auto my-auto">
-        <div className="p-5 bg-[#F7F8F3] border border-[#E5E7EB] rounded-xl flex items-start gap-4">
-          <ShieldCheck className="w-6 h-6 text-[#38B66B] shrink-0 mt-0.5" />
-          <div className="space-y-1.5">
-            <h3 className="font-bold text-[#14213D] text-base">Educational Health & Fitness Disclaimer</h3>
-            <p className="text-xs text-gray-600 leading-normal">
-              This publication, <em>The Fit Student Blueprint</em>, is designed solely for educational, informational, and personal habit-building purposes. It is not intended to substitute for professional medical advice, clinical diagnosis, or personalized physical therapy. Always consult with a qualified physician or healthcare provider before undertaking any new exercise program, dietary adjustment, or lifestyle protocol, especially if you have pre-existing health conditions or injuries.
+      <div className="space-y-5 text-sm text-gray-700 leading-relaxed max-w-2xl mx-auto my-auto">
+        {/* Core Medical Disclaimer Banner */}
+        <div className="p-4 sm:p-5 bg-rose-50/70 border border-rose-200 rounded-xl flex items-start gap-3.5">
+          <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <h3 className="font-bold text-rose-950 text-sm">
+              Medical & Exercise Liability Disclaimer
+            </h3>
+            <p className="text-xs text-rose-900/85 leading-relaxed">
+              <em>The Fit Student Blueprint</em> is published strictly for educational, informational, and general habit-building purposes. It does not provide medical advice, diagnosis, or clinical treatment. Always consult with a licensed physician or healthcare provider before starting any exercise program or modifying your diet. By using this workbook, you voluntarily assume all known and unknown risks of physical activity and agree to release the authors and publishers from any liability.
             </p>
           </div>
         </div>
 
-        <div className="space-y-4 pt-2">
-          <h4 className="font-bold text-[#14213D] text-sm uppercase tracking-wider">No Extreme Claims Policy</h4>
-          <p className="text-xs text-gray-600">
-            This workbook explicitly rejects extreme crash diets, dangerous caloric deficits, unproven supplements, and rapid transformation illusions. Results vary depending on personal starting points, sleep quality, academic schedules, genetic factors, and individual consistency. The objective of this blueprint is sustainable physical resilience, enhanced daily energy, and durable student habit systems.
-          </p>
-
-          <div className="border-t border-[#ECEEE7] pt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-gray-500">
-            <div>
-              <p className="font-semibold text-gray-700">Publication Title:</p>
-              <p>The Fit Student Blueprint: Your 30-Day Guide to Getting Fit, Building Healthy Habits & Feeling Better at University</p>
-            </div>
-            <div>
-              <p className="font-semibold text-gray-700">Target Audience:</p>
-              <p>University & College Students (Ages 18–25)</p>
-            </div>
-            <div>
-              <p className="font-semibold text-gray-700">Edition:</p>
-              <p>Interactive Digital Workbook & Printable System</p>
-            </div>
-            <div>
-              <p className="font-semibold text-gray-700">Core Message:</p>
-              <p className="font-bold text-[#38B66B]">MOVE • FUEL • RECOVER • REPEAT</p>
-            </div>
+        {/* License & Copyright Protection Banner */}
+        <div className="p-4 sm:p-5 bg-[#F7F8F3] border border-[#E5E7EB] rounded-xl flex items-start gap-3.5">
+          <Scale className="w-5 h-5 text-[#14213D] shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <h3 className="font-bold text-[#14213D] text-sm">
+              Single-User Personal License & Anti-Piracy Notice
+            </h3>
+            <p className="text-xs text-gray-600 leading-relaxed">
+              Each purchase entitles you to one non-transferable personal license. You may print physical copies for personal student study. You are strictly forbidden from uploading this book to shared cloud drives, torrent networks, WhatsApp/Telegram groups, or Discord servers. Unauthorized distribution is a violation of copyright law and subject to statutory penalties.
+            </p>
           </div>
+        </div>
 
-          <div className="p-4 bg-white border border-[#E5E7EB] rounded-lg text-xs text-gray-500 space-y-1">
-            <p>© All rights reserved. No part of this publication may be reproduced, distributed, or transmitted in any form or by any means for commercial resale without prior written permission, except for personal student printing and workbook exercise completion.</p>
+        {/* Legal Policies Modal Quick Launchers */}
+        <div className="p-4 bg-white border border-gray-200 rounded-xl space-y-2.5">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-[#14213D] uppercase tracking-wider">
+              Official Legal & Compliance Documents
+            </span>
+            <span className="text-[10px] text-gray-400">Updated Sept 2026</span>
+          </div>
+          <p className="text-[11px] text-gray-500">
+            Click any section below to review the full, binding legal policies in detail:
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+            <button
+              type="button"
+              onClick={() => openLegal('health')}
+              className="px-2.5 py-2 rounded-lg bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-800 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors"
+            >
+              <HeartPulse className="w-3.5 h-3.5 text-rose-600" />
+              <span>Health Disclaimer</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => openLegal('privacy')}
+              className="px-2.5 py-2 rounded-lg bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Privacy Policy</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => openLegal('terms')}
+              className="px-2.5 py-2 rounded-lg bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors"
+            >
+              <Scale className="w-3.5 h-3.5 text-amber-700" />
+              <span>Terms of Sale</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => openLegal('refund')}
+              className="px-2.5 py-2 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-900 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors"
+            >
+              <RotateCcw className="w-3.5 h-3.5 text-blue-600" />
+              <span>Refund Policy</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Publication Metadata & Support Contacts */}
+        <div className="border-t border-[#ECEEE7] pt-3.5 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-gray-500">
+          <div>
+            <p className="font-semibold text-gray-700">Publisher:</p>
+            <p>Modern Student Wellness Publishing</p>
+          </div>
+          <div>
+            <p className="font-semibold text-gray-700">Support & Privacy Desk:</p>
+            <p className="text-[#38B66B] font-bold">support@thefitstudent.com</p>
+          </div>
+          <div>
+            <p className="font-semibold text-gray-700">Target Audience:</p>
+            <p>University & College Students (Ages 18–25)</p>
+          </div>
+          <div>
+            <p className="font-semibold text-gray-700">Core Motto:</p>
+            <p className="font-bold text-[#38B66B]">MOVE • FUEL • RECOVER • REPEAT</p>
           </div>
         </div>
       </div>
+
+      {/* Embedded Legal Modal */}
+      <LegalModal
+        isOpen={isLegalModalOpen}
+        onClose={() => setIsLegalModalOpen(false)}
+        initialTab={legalTab}
+      />
     </PageContainer>
   );
 };
