@@ -4,6 +4,7 @@ import { BOOK_PAGES, PART_INFO } from './data/bookData';
 import { PageRenderer } from './components/PageRenderer';
 import { PdfExportModal } from './components/PdfExportModal';
 import { SalesPage } from './components/sales/SalesPage';
+import { CheckoutModal } from './components/sales/CheckoutModal';
 
 import {
   BookOpen,
@@ -22,12 +23,15 @@ import {
   Sparkles,
   FileText,
   ShoppingBag,
+  Lock,
 } from 'lucide-react';
 
 function WorkbookApp() {
-  const { state, currentPage, totalPages, setCurrentPage, nextPage, prevPage } = useWorkbook();
+  const { state, currentPage, totalPages, setCurrentPage, nextPage, prevPage, isUnlocked } = useWorkbook();
   const [isTocOpen, setIsTocOpen] = useState(false);
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [checkoutTier, setCheckoutTier] = useState<'starter' | 'complete' | 'mastery'>('complete');
   const [pageInput, setPageInput] = useState<string>(String(currentPage));
 
   // Mode: 'sales' | 'workbook'
@@ -76,9 +80,19 @@ function WorkbookApp() {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
       setIsTocOpen(false);
+      if (typeof window !== 'undefined' && window.history?.replaceState) {
+        window.history.replaceState(null, '', `#page-${page}`);
+      }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [setCurrentPage, totalPages]);
+
+  // Sync hash with current page when in workbook mode
+  useEffect(() => {
+    if (viewMode === 'workbook' && typeof window !== 'undefined' && window.history?.replaceState) {
+      window.history.replaceState(null, '', `#page-${currentPage}`);
+    }
+  }, [currentPage, viewMode]);
 
   const handleOpenWorkbookFromSales = useCallback((targetPage = 1) => {
     setViewMode('workbook');
@@ -262,6 +276,27 @@ function WorkbookApp() {
               <ChevronRight className="w-4 h-4" />
             </button>
 
+            {/* Quick Unlock or Unlocked Status Badge */}
+            {!isUnlocked ? (
+              <button
+                onClick={() => {
+                  setCheckoutTier('complete');
+                  setIsCheckoutOpen(true);
+                }}
+                className="flex items-center gap-1.5 bg-gradient-to-r from-amber-500 to-[#F4C95D] hover:from-amber-600 hover:to-[#e5bc4f] text-[#14213D] text-xs font-bold px-2.5 sm:px-3 py-1.5 rounded-lg transition-all shadow-sm shrink-0"
+                title="Unlock Full 68-Page Edition & Complete PDF"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Unlock Full Access</span>
+                <span className="sm:hidden">Unlock</span>
+              </button>
+            ) : (
+              <div className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded bg-[#38B66B]/20 border border-[#38B66B]/30 text-[#38B66B] text-[11px] font-bold">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>Full Access</span>
+              </div>
+            )}
+
             <button
               onClick={() => setIsPdfModalOpen(true)}
               className="flex items-center gap-1.5 bg-[#38B66B] hover:bg-[#2fa35e] text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ml-1 shadow-sm"
@@ -321,22 +356,41 @@ function WorkbookApp() {
               </button>
             </div>
 
-            {/* Sales Page Quick Link in Drawer */}
-            <div className="p-3 bg-gradient-to-r from-[#38B66B]/20 to-[#F4C95D]/20 border-b border-white/10 flex items-center justify-between">
-              <div className="text-xs">
-                <span className="font-bold text-white block">Program Overview & Pricing</span>
-                <span className="text-[10px] text-gray-300">Bonuses, reviews, and guarantee</span>
+            {/* Sales Page Quick Link & Unlock Status in Drawer */}
+            {!isUnlocked ? (
+              <div className="p-3 bg-gradient-to-r from-amber-500/25 via-[#F4C95D]/20 to-amber-500/25 border-b border-amber-500/30 flex items-center justify-between">
+                <div className="text-xs">
+                  <span className="font-bold text-amber-300 block">Previewing Free Sample (Pages 1–8)</span>
+                  <span className="text-[10px] text-gray-300">Unlock all 68 pages, 25 worksheets & 300 DPI PDF</span>
+                </div>
+                <button
+                  onClick={() => {
+                    setIsTocOpen(false);
+                    setCheckoutTier('complete');
+                    setIsCheckoutOpen(true);
+                  }}
+                  className="px-2.5 py-1 rounded bg-gradient-to-r from-amber-400 to-[#F4C95D] hover:brightness-105 text-[#14213D] text-[11px] font-bold uppercase tracking-wider shrink-0 transition-all shadow"
+                >
+                  Unlock GH₵ 79
+                </button>
               </div>
-              <button
-                onClick={() => {
-                  setIsTocOpen(false);
-                  handleSwitchToSales();
-                }}
-                className="px-2.5 py-1 rounded bg-[#38B66B] hover:bg-[#2fa35e] text-white text-[11px] font-bold uppercase tracking-wider shrink-0 transition-colors shadow"
-              >
-                Sales Page &rarr;
-              </button>
-            </div>
+            ) : (
+              <div className="p-3 bg-gradient-to-r from-[#38B66B]/20 to-[#F4C95D]/20 border-b border-white/10 flex items-center justify-between">
+                <div className="text-xs">
+                  <span className="font-bold text-white block">Program Overview & Pricing</span>
+                  <span className="text-[10px] text-gray-300">Bonuses, reviews, and guarantee</span>
+                </div>
+                <button
+                  onClick={() => {
+                    setIsTocOpen(false);
+                    handleSwitchToSales();
+                  }}
+                  className="px-2.5 py-1 rounded bg-[#38B66B] hover:bg-[#2fa35e] text-white text-[11px] font-bold uppercase tracking-wider shrink-0 transition-colors shadow"
+                >
+                  Sales Page &rarr;
+                </button>
+              </div>
+            )}
 
             {/* Quick Part Tabs */}
             <div className="p-3 bg-black/20 border-b border-white/10 grid grid-cols-3 gap-1.5 text-center text-[10px] font-bold">
@@ -476,6 +530,22 @@ function WorkbookApp() {
         isOpen={isPdfModalOpen}
         onClose={() => setIsPdfModalOpen(false)}
         currentPage={currentPage}
+        onOpenCheckout={(tier) => {
+          setIsPdfModalOpen(false);
+          setCheckoutTier(tier || 'complete');
+          setIsCheckoutOpen(true);
+        }}
+      />
+
+      {/* Checkout & Instant Access Modal */}
+      <CheckoutModal
+        isOpen={isCheckoutOpen}
+        onClose={() => setIsCheckoutOpen(false)}
+        selectedTier={checkoutTier}
+        onAccessWorkbook={(targetPage = 1) => {
+          setIsCheckoutOpen(false);
+          handleJump(targetPage);
+        }}
       />
     </div>
   );
